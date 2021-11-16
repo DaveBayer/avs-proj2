@@ -78,6 +78,7 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
         uint half_size = size / 2;
         float r = mIsoLevel * static_cast<float>(half_size) * sqrtf(3.f);
 
+#       pragma omp parallel for reduction(+: totalTriangles)
         for (auto sc : get_subcubes(pos, size)) {
             Vec3_t<float> S = cube_center(sc, half_size);
             
