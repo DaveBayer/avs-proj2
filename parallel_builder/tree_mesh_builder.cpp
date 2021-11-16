@@ -35,7 +35,7 @@ std::array<Vec3_t<T>, 8> get_subcubes_positions(Vec3_t<T> p, uint s)
 {
     T h = static_cast<T>(s) / 2;
 
-    return std::array<Vec3_t<T>, 8>{
+    return {
         { p.x, p.y, p.z },
         { p.x + h, p.y, p.z },
         { p.x, p.y + h, p.z },
