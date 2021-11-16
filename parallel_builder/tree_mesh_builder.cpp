@@ -85,11 +85,11 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
             Vec3_t<float> S = cube_center(sc, half_size);
             
             if (evaluateFieldAt(S, field) > r) {
-#               pragma omp task
+#               pragma omp task shared(totalTirangles)
                 totalTriangles += decomposeOctree(sc, half_size, field);
             }
         }
-        #pragma omp taskwait
+#       pragma omp taskwait
 
     } else
         totalTriangles = buildCube(pos, field);
