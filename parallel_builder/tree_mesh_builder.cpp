@@ -35,7 +35,7 @@ std::array<Vec3_t<T>, 8UL> get_subcubes_positions(Vec3_t<T> p, uint s)
 {
     T h = static_cast<T>(s) / 2;
 
-    std::array<Vec3_t<T>, 8UL> ret = {{
+    return std::array<Vec3_t<T>, 8UL> {{
         { p.x, p.y, p.z },
         { p.x + h, p.y, p.z },
         { p.x, p.y + h, p.z },
@@ -45,8 +45,6 @@ std::array<Vec3_t<T>, 8UL> get_subcubes_positions(Vec3_t<T> p, uint s)
         { p.x + h, p.y, p.z + h },
         { p.x + h, p.y + h, p.z + h }
     }};
-
-    return ret;
 }
 
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> position, uint size, const ParametricScalarField &field)
