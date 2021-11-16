@@ -58,6 +58,7 @@ float LoopMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const Parametri
 
     // 2. Find minimum square distance from points "pos" to any point in the
     //    field.
+#   pragma omp simd
     for(unsigned i = 0; i < count; ++i)
     {
         float distanceSquared  = (pos.x - pPoints[i].x) * (pos.x - pPoints[i].x);
