@@ -67,7 +67,7 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> position, uint size, const P
         std::array<Vec3_t<float>, 8> subcubes = get_subcubes_positions(position, size);
         
         for (auto sc_pos : subcubes) {
-            decomposeOctree(sc_pos, new_size, field);
+            totalCubesCount += decomposeOctree(sc_pos, new_size, field);
         }
 
     } else
