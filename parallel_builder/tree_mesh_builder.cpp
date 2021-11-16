@@ -39,7 +39,7 @@ std::array<Vec3_t<T>, 8UL> get_subcubes_positions(Vec3_t<T> p, uint s)
 
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
-    uint totalCubesCount = 0;
+    uint totalTriangles = 0;
     uint half_size = size / 2;
 
     Vec3_t<float> S = { pos.x + half_size, pos.y + half_size, pos.z + half_size };
@@ -48,17 +48,16 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
     if (evaluateFieldAt(S, field) > r) {
         if (size > 1) {
 
-#           pragma omp parallel for reduction(+: totalCubesCount)
+#           pragma omp parallel for reduction(+: totalTriangles)
             for (auto sc_pos : get_subcubes_positions(pos, size)) {
-                totalCubesCount += decomposeOctree(sc_pos, half_size, field);
+                totalTriangles += decomposeOctree(sc_pos, half_size, field);
             }
 
         } else
-            totalCubesCount = buildCube(pos, field);
+            totalTriangles = buildCube(pos, field);
     }
 
-    return totalCubesCount;
-
+    return totalTriangles;
 }
 
 unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
