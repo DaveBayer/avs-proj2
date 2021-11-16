@@ -55,7 +55,7 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
     Vec3_t<float> S = { pos.x + half_size, pos.y + half_size, pos.z + half_size };
     float r = mIsoLevel * static_cast<float>(size) * sqrt(3.0) / 2;
 
-    if (!(evaluateFieldAt(S, field) > r)) {
+    if (evaluateFieldAt(S, field) > r) {
         if (size > 1) {
             for (auto sc_pos : get_subcubes_positions(pos, size)) {
                 totalCubesCount += decomposeOctree(sc_pos, half_size, field);
