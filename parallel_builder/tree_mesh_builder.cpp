@@ -47,31 +47,32 @@ std::array<Vec3_t<T>, 8UL> get_subcubes_positions(Vec3_t<T> p, uint s)
     }};
 }
 
-uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> position, uint size, const ParametricScalarField &field)
+template<typename T>
+bool idk(Vec3_t<T> p, uint s, T iso_level)
+{
+    T h = static_cast<T>(size) / 2;
+    Vec3_t<T> S = { p.x + h, p.y + h, p.z + h };
+
+
+}
+
+uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
     uint totalCubesCount = 0;
-/*
-    Vec3_t<float> S = {
-        position.x + float(size) / 2,
-        position.y + float(size) / 2,
-        position.z + float(size) / 2
-    };
-    const float mul = sqrt(3.0) / 2;
+    uint half_size = size / 2;
 
-    if ()
-*/
-    
+    Vec3_t<float> S = { pos.x + half_size, pos.y + half_size, pos.z + half_size };
+    float r = mIsoLevel * static_cast<float>(size) * sqrt(3.0) / 2;
 
-    if (size > 1) {
-        uint new_size = size / 2;
-        std::array<Vec3_t<float>, 8> subcubes = get_subcubes_positions(position, size);
-        
-        for (auto sc_pos : subcubes) {
-            totalCubesCount += decomposeOctree(sc_pos, new_size, field);
-        }
+    if (!(evaluateFieldAt(S, field) > r)) {
+        if (size > 1) {
+            for (auto sc_pos : get_subcubes_positions(pos, size)) {
+                totalCubesCount += decomposeOctree(sc_pos, half_size, field);
+            }
 
-    } else
-        totalCubesCount = buildCube(position, field);
+        } else
+            totalCubesCount = buildCube(pos, field);
+    }
 
     return totalCubesCount;
 
