@@ -73,17 +73,19 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
     uint totalTriangles = 0;
-    uint half_size = size / 2;
     
     if (size > 1) {
-        float r = mIsoLevel * static_cast<float>(size) * sqrt(3.0) / 2.0;
+        uint half_size = size / 2;
+        float r = mIsoLevel * static_cast<float>(half_size) * sqrtf(3.f);
 
-#       pragma omp parallel for reduction(+: totalTriangles)
         for (auto sc : get_subcubes(pos, size)) {
             Vec3_t<float> S = cube_center(sc, half_size);
             
             if (evaluateFieldAt(S, field) > r) {
-                totalTriangles += decomposeOctree(sc, half_size, field);
+#               pragma omp parallel reduction(+: totalTriangles)
+                {
+                    totalTriangles += decomposeOctree(sc, half_size, field);
+                }
             }
         }
 
