@@ -74,7 +74,6 @@ float LoopMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const Parametri
     return sqrt(value);
 }
 
-#pragma omp declare parallel 
 void LoopMeshBuilder::emitTriangle(const BaseMeshBuilder::Triangle_t &triangle)
 {
     // NOTE: This method is called from "buildCube(...)"!
