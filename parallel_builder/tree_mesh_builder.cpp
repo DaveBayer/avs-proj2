@@ -21,16 +21,6 @@ TreeMeshBuilder::TreeMeshBuilder(unsigned gridEdgeSize)
 }
 
 template<typename T>
-Vec3_t<T> cube_index_to_offset(uint index, uint grid_size)
-{
-    return Vec3_t<T>(
-        index % grid_size,
-        (index / grid_size) % grid_size,
-        index / (grid_size * grid_size)
-    );
-}
-
-template<typename T>
 std::array<Vec3_t<T>, 8UL> get_subcubes_positions(Vec3_t<T> p, uint s)
 {
     T h = static_cast<T>(s) / 2;
@@ -53,10 +43,12 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
     uint half_size = size / 2;
 
     Vec3_t<float> S = { pos.x + half_size, pos.y + half_size, pos.z + half_size };
-    float r = mIsoLevel * static_cast<float>(size) * sqrt(3.0) / 2;
+    float r = mIsoLevel * static_cast<float>(size) * sqrt(3.0) / 2.0;
 
     if (evaluateFieldAt(S, field) > r) {
         if (size > 1) {
+
+#           pragma omp parallel for reduction(+: totalCubesCount)
             for (auto sc_pos : get_subcubes_positions(pos, size)) {
                 totalCubesCount += decomposeOctree(sc_pos, half_size, field);
             }
