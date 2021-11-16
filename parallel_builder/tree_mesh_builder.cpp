@@ -11,6 +11,7 @@
 #include <iostream>
 #include <math.h>
 #include <limits>
+#include <bitset>
 
 #include "tree_mesh_builder.h"
 
@@ -21,7 +22,7 @@ TreeMeshBuilder::TreeMeshBuilder(unsigned gridEdgeSize)
 }
 
 template<typename T>
-std::array<Vec3_t<T>, 8UL> get_subcubes_positions(Vec3_t<T> p, uint s)
+std::array<Vec3_t<T>, 8UL> get_subcubes(Vec3_t<T> p, uint s)
 {
     T h = static_cast<T>(s) / 2;
 
@@ -37,6 +38,14 @@ std::array<Vec3_t<T>, 8UL> get_subcubes_positions(Vec3_t<T> p, uint s)
     }};
 }
 
+template<typename T>
+Vec3_t<T> cube_center(Vec3_t<T> p, uint s)
+{
+    T h = static_cast<T>(s) / 2;
+
+    return { p.x + h, p.y + h, p.z + h };
+}
+/*
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
     uint totalTriangles = 0;
@@ -48,14 +57,38 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
     if (evaluateFieldAt(S, field) > r) {
         if (size > 1) {
 
+
 #           pragma omp parallel for reduction(+: totalTriangles)
-            for (auto sc_pos : get_subcubes_positions(pos, size)) {
+            for (auto sc_pos : get_subcubes(pos, size)) {
                 totalTriangles += decomposeOctree(sc_pos, half_size, field);
             }
 
         } else
             totalTriangles = buildCube(pos, field);
     }
+
+    return totalTriangles;
+}
+*/
+uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
+{
+    uint totalTriangles = 0;
+    uint half_size = size / 2;
+    
+    if (size > 1) {
+        float r = mIsoLevel * static_cast<float>(size) * sqrt(3.0) / 2.0;
+
+#       pragma omp parallel for reduction(+: totalTriangles)
+        for (auto sc : get_subcubes(pos, size)) {
+            Vec3_t<float> S = cube_center(sc, half_size);
+            
+            if (evaluateFieldAt(S, field) > r) {
+                totalTriangles += decomposeOctree(sc, half_size, field);
+            }
+        }
+
+    } else
+        totalTriangles = buildCube(pos, field);
 
     return totalTriangles;
 }
