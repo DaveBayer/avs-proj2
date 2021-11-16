@@ -47,15 +47,6 @@ std::array<Vec3_t<T>, 8UL> get_subcubes_positions(Vec3_t<T> p, uint s)
     }};
 }
 
-template<typename T>
-bool idk(Vec3_t<T> p, uint s, T iso_level)
-{
-    T h = static_cast<T>(size) / 2;
-    Vec3_t<T> S = { p.x + h, p.y + h, p.z + h };
-
-
-}
-
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
     uint totalCubesCount = 0;
