@@ -67,7 +67,7 @@ float LoopMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const Parametri
 
         // Comparing squares instead of real distance to avoid unnecessary
         // "sqrt"s in the loop.
-        value = std::min(value, distanceSquared);
+        value = value > distanceSquared ? distanceSquared : value;
     }
 
     // 3. Finally take square root of the minimal square distance to get the real distance
