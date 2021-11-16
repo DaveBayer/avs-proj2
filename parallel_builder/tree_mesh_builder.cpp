@@ -20,6 +20,21 @@ TreeMeshBuilder::TreeMeshBuilder(unsigned gridEdgeSize)
 
 }
 
+uint TreeMeshBuilder::decomposeOctree(uint offset, uint size, const ParametricScalarField &field)
+{
+/*
+    uint totalCubesCount = 0;
+
+    if (from - to > 0) {
+
+    } else {
+        
+    }
+
+    return totalCubesCount;
+*/
+}
+
 unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 {
     // Suggested approach to tackle this problem is to add new method to
@@ -27,7 +42,11 @@ unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
     // It is also strongly suggested to first implement Octree as sequential
     // code and only when that works add OpenMP tasks to achieve parallelism.
     
-    return 0;
+    unsigned totalCubesCount = 0;
+
+
+
+    return totalCubesCount;
 }
 
 float TreeMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const ParametricScalarField &field)
