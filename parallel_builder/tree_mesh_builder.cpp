@@ -12,6 +12,7 @@
 #include <math.h>
 #include <limits>
 #include <bitset>
+#include <omp.h>
 
 #include "tree_mesh_builder.h"
 
