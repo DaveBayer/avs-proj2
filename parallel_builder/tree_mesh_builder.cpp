@@ -78,20 +78,17 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
         uint half_size = size / 2;
         float r = mIsoLevel * static_cast<float>(half_size) * sqrtf(3.f);
 
-//#       pragma omp parallel for reduction(+: totalTriangles)
-#       pragma omp parallel reduction(+: totalTriangles)
-        {
-#           pragma omp single
-            for (auto sc : get_subcubes(pos, size)) {
-                Vec3_t<float> S = cube_center(sc, half_size);
-                
-                if (evaluateFieldAt(S, field) > r) {
-#                   pragma omp task shared(totalTriangles)
-                    totalTriangles += decomposeOctree(sc, half_size, field);
-                }
+        for (auto sc : get_subcubes(pos, size)) {
+            Vec3_t<float> S = cube_center(sc, half_size);
+            
+            if (evaluateFieldAt(S, field) > r) {
+#               pragma omp task shared(totalTriangles)
+                totalTriangles += decomposeOctree(sc, half_size, field);
             }
-#           pragma omp taskwait
+            
         }
+        
+#       pragma omp taskwait
 
     } else
         totalTriangles = buildCube(pos, field);
@@ -106,6 +103,8 @@ unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
     // It is also strongly suggested to first implement Octree as sequential
     // code and only when that works add OpenMP tasks to achieve parallelism.
 
+#   pragma omp parallel
+#   pragma omp single
     return decomposeOctree(Vec3_t<float>(0.f, 0.f, 0.f), mGridSize, field);
 }
 
