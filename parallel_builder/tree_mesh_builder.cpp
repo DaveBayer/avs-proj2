@@ -80,16 +80,18 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
 
 //#       pragma omp parallel for reduction(+: totalTriangles)
 #       pragma omp parallel reduction(+: totalTriangles)
-#       pragma omp single
-        for (auto sc : get_subcubes(pos, size)) {
-            Vec3_t<float> S = cube_center(sc, half_size);
-            
-            if (evaluateFieldAt(S, field) > r) {
-#               pragma omp task shared(totalTriangles)
-                totalTriangles += decomposeOctree(sc, half_size, field);
+        {
+#           pragma omp single
+            for (auto sc : get_subcubes(pos, size)) {
+                Vec3_t<float> S = cube_center(sc, half_size);
+                
+                if (evaluateFieldAt(S, field) > r) {
+#                   pragma omp task shared(totalTriangles)
+                    totalTriangles += decomposeOctree(sc, half_size, field);
+                }
             }
+#           pragma omp taskwait
         }
-#       pragma omp taskwait
 
     } else
         totalTriangles = buildCube(pos, field);
