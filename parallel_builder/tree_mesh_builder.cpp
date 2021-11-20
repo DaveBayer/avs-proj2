@@ -50,18 +50,19 @@ Vec3_t<T> cube_center(Vec3_t<T> p, uint s)
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
     uint totalTriangles = 0;
-    uint half_size = size / 2;
     constexpr float half_sqrt_3 = static_cast<float>(sqrt(3.0) / 2.0);
 
-    Vec3_t<float> S = { pos.x + half_size, pos.y + half_size, pos.z + half_size };
+    Vec3_t<float> S = cube_center(pos, size);
     float r = mIsoLevel + half_sqrt_3 * static_cast<float>(size);
 
     if (!(evaluateFieldAt(S, field) > r)) {
         if (size > 1) {
 
             for (auto sc_pos : get_subcubes(pos, size)) {
-#               pragma omp task shared(totalTriangles) firstprivate(sc_pos, half_size, field)
-                totalTriangles += decomposeOctree(sc_pos, half_size, field);
+#               pragma omp task shared(totalTriangles) firstprivate(sc_pos, size, field)
+                {
+                    totalTriangles += decomposeOctree(sc_pos, size / 2, field);
+                }
             }
 
 #           pragma omp taskwait
