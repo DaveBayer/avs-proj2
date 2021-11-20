@@ -153,7 +153,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
         float r = mIsoLevel + half_sqrt_3 * static_cast<float>(subcube_size) * mGridResolution;
 
         for (auto sc : get_subcubes_idx(index, size, mGridSize)) {
-            Vec3_t<float> S = cube_center(cube_index_to_offset<float>(sc, subcube_size, mGridSize), subcube_size);
+            Vec3_t<float> S = cube_center(cube_index_to_offset<float>(sc, mGridSize), subcube_size);
             S = { S.x * mGridResolution, S.y * mGridResolution, S.z * mGridResolution };
 
             if (!(evaluateFieldAt(S, field) > r)) {
