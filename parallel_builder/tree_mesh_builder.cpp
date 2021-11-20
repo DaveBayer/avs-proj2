@@ -46,7 +46,7 @@ Vec3_t<T> cube_center(Vec3_t<T> p, uint s)
 
     return { p.x + h, p.y + h, p.z + h };
 }
-/*
+
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
     uint totalTriangles = 0;
@@ -58,11 +58,12 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
     if (evaluateFieldAt(S, field) > r) {
         if (size > 1) {
 
-
-#           pragma omp parallel for reduction(+: totalTriangles)
+#           pragma omp task shared(totalTriangles)
             for (auto sc_pos : get_subcubes(pos, size)) {
                 totalTriangles += decomposeOctree(sc_pos, half_size, field);
             }
+
+#           pragma omp taskwait
 
         } else
             totalTriangles = buildCube(pos, field);
@@ -70,14 +71,15 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
 
     return totalTriangles;
 }
-*/
+
+/*
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
     uint totalTriangles = 0;
     
     if (size > 1) {
         uint half_size = size / 2;
-        float r = mIsoLevel * static_cast<float>(half_size) * sqrtf(3.f);
+        float r = mIsoLevel * static_cast<float>(half_size) * sqrt(3.0);
 
         for (auto sc : get_subcubes(pos, size)) {
             Vec3_t<float> S = cube_center(sc, half_size);
@@ -96,7 +98,7 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
 
     return totalTriangles;
 }
-
+*/
 unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 {
     // Suggested approach to tackle this problem is to add new method to
@@ -105,11 +107,6 @@ unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
     // code and only when that works add OpenMP tasks to achieve parallelism.
 
     uint totalTriangles;
-
-    int proc_num = omp_get_num_procs();
-    if (proc_num > 8)
-        proc_num--;
-    omp_set_num_threads(proc_num);
 
 #   pragma omp parallel
 #   pragma omp master
