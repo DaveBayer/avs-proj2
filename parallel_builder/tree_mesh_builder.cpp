@@ -46,14 +46,15 @@ Vec3_t<T> cube_center(Vec3_t<T> p, uint s)
 
     return { p.x + h, p.y + h, p.z + h };
 }
-/*
+
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
     uint totalTriangles = 0;
     uint half_size = size / 2;
+    constexpr float half_sqrt_3 = static_cast<float>(sqrt(3.0) / 2.0);
 
     Vec3_t<float> S = { pos.x + half_size, pos.y + half_size, pos.z + half_size };
-    float r = mIsoLevel * static_cast<float>(size) * sqrt(3.0) / 2.0;
+    float r = mIsoLevel + half_sqrt_3 static_cast<float>(size);
 
     if (evaluateFieldAt(S, field) > r) {
         if (size > 1) {
@@ -71,8 +72,8 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
 
     return totalTriangles;
 }
-*/
 
+/*
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
     uint totalTriangles = 0;
@@ -85,7 +86,7 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
         for (auto sc : get_subcubes(pos, size)) {
             Vec3_t<float> S = cube_center(sc, subcube_size);
             
-            if (evaluateFieldAt(S, field) > r) {
+            if (!(evaluateFieldAt(S, field) > r)) {
 #               pragma omp task shared(totalTriangles) firstprivate(sc, subcube_size, field)
                 {
                     totalTriangles += decomposeOctree(sc, subcube_size, field);
@@ -101,7 +102,7 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
 
     return totalTriangles;
 }
-
+*/
 unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 {
     // Suggested approach to tackle this problem is to add new method to
