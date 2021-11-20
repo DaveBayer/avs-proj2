@@ -140,16 +140,12 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
             index + z_shift + y_shift,    index + z_shift + y_shift + x_shift
         }};
     };
-/*
-    auto cube_index_to_position = [this](Vec3_t<float> p) -> Vec3_t<float>
+
+    auto cube_index_to_offset = [this](uint i) -> Vec3_t<float>
     {
-        return {
-            (i % grid_size) * mGridResolution,
-            ((i / grid_size) % grid_size) * mGridResolution,
-            (i / (grid_size * grid_size)) * mGridResolution
-        };
+        return { (i % mGridSize), ((i / mGridSize) % mGridSize), (i / (mGridSize * mGridSize)) };
     };
-*/
+
     auto cube_center = [this](uint i, uint s) -> Vec3_t<float>
     {
         return {
@@ -185,7 +181,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
 #       pragma omp taskwait
 
     } else
-        totalTriangles = buildCube(cube_index_to_offset<float>(index, mGridSize), field);
+        totalTriangles = buildCube(cube_index_to_offset(index), field);
 
     return totalTriangles;
 }
