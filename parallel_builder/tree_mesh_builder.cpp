@@ -21,7 +21,7 @@ TreeMeshBuilder::TreeMeshBuilder(unsigned gridEdgeSize)
 {
 
 }
-
+/*
 TreeMeshBuilder::Subcubes TreeMeshBuilder::get_subcubes(Vec3_t<float> p, uint size)
 {
     float sh = static_cast<float>(size >> 1) * mGridResolution;   //  (size / 2) * mGridResolution
@@ -41,7 +41,7 @@ Vec3_t<float> TreeMeshBuilder::cube_center(Vec3_t<float> p, uint s)
 {
     float sh = static_cast<float>(s >> 1) * mGridResolution;
     return { p.x + sh, p.y + sh, p.z + sh };
-}
+}*/
 /*
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
@@ -119,43 +119,59 @@ unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 }
 */
 
-template<typename T>
-Vec3_t<T> cube_index_to_offset(uint i, uint grid_size)
-{
-    return Vec3_t<T>(i % grid_size, (i / grid_size) % grid_size, i / (grid_size * grid_size));
-}
-
-std::array<uint, 8UL> get_subcubes_idx(uint index, uint size, uint gs)
-{
-    uint x_shift = size >> 1;   //  size / 2
-    uint y_shift = x_shift * gs;
-    uint z_shift = y_shift * gs;
-
-    return std::array<uint, 8UL> {{
-        index,
-        index + x_shift,
-        index + y_shift,
-        index + y_shift + x_shift,
-        index + z_shift,
-        index + z_shift + x_shift,
-        index + z_shift + y_shift,
-        index + z_shift + y_shift + x_shift
-    }};
-}
-
 uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricScalarField &field)
 {
+    auto sphere_radius = [this](uint size) -> float
+    {
+        constexpr float half_sqrt_3 = static_cast<float>(sqrt(3.0) / 2.0);
+        return mIsoLevel + half_sqrt_3 * static_cast<float>(size) * mGridResolution;
+    };
+
+    auto decompose = [this](uint index, uint size) -> std::array<uint, 8UL>
+    {
+        uint x_shift = size >> 1;   //  size / 2
+        uint y_shift = x_shift * gs;
+        uint z_shift = y_shift * gs;
+
+        return std::array<uint, 8UL> {{
+            index,                        index + x_shift,
+            index + y_shift,              index + y_shift + x_shift,
+            index + z_shift,              index + z_shift + x_shift,
+            index + z_shift + y_shift,    index + z_shift + y_shift + x_shift
+        }};
+    };
+/*
+    auto cube_index_to_position = [this](Vec3_t<float> p) -> Vec3_t<float>
+    {
+        return {
+            (i % grid_size) * mGridResolution,
+            ((i / grid_size) % grid_size) * mGridResolution,
+            (i / (grid_size * grid_size)) * mGridResolution
+        };
+    };
+*/
+    auto cube_center = [this](uint i, uint s) -> Vec3_t<float>
+    {
+        return {
+            ((i % grid_size) + s >> 1) * mGridResolution;
+            (((i / grid_size) % grid_size) + s >> 1) * mGridResolution,
+            ((i / (grid_size * grid_size)) + s >> 1) * mGridResolution
+        };
+    };
+
     uint totalTriangles = 0;
-    constexpr float half_sqrt_3 = static_cast<float>(sqrt(3.0) / 2.0);
     
     if (size > 1) {
         uint subcube_size = size >> 1;  //  size / 2
-        float r = mIsoLevel + half_sqrt_3 * static_cast<float>(size) * mGridResolution;
+        float r = sphere_radius(size);
 
-        for (auto sc : get_subcubes_idx(index, size, mGridSize)) {
+        for (auto sc : decompose(index, size)) {
+            /*
             Vec3_t<float> sc_vec = cube_index_to_offset<float>(sc, mGridSize);
             sc_vec = { sc_vec.x * mGridResolution, sc_vec.y * mGridResolution, sc_vec.z * mGridResolution };
             Vec3_t<float> S = cube_center(sc_vec, subcube_size);
+            */
+            Vec3_t<float> S = cube_center(sc, subcube_size);
 
             if (!(evaluateFieldAt(S, field) > r)) {
 #               pragma omp task shared(totalTriangles) firstprivate(sc, subcube_size, field)
