@@ -19,12 +19,6 @@ public:
     TreeMeshBuilder(unsigned gridEdgeSize);
 
 protected:
-/*
-    using Subcubes = std::array<Vec3_t<float>, 8UL>;
-
-    Subcubes get_subcubes(Vec3_t<float>, uint);
-    Vec3_t<float> cube_center(Vec3_t<float>, uint);
-*/
     uint decomposeOctree(Vec3_t<float>, uint, const ParametricScalarField &);
     uint decomposeOctree(uint index, uint size, const ParametricScalarField &field);
     unsigned marchCubes(const ParametricScalarField &field);
