@@ -150,11 +150,11 @@ std::array<uint, 8UL> get_subcubes(uint index, uint size, uint gs)
 uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricScalarField &field)
 {
     uint totalTriangles = 0;
-    constexpr float half_sqrt_3 = static_cast<float>(sqrt(3.0));
+    constexpr float half_sqrt_3 = static_cast<float>(sqrt(3.0) / 2.0);
     
     if (size > 1) {
         uint subcube_size = size >> 1;  //  size / 2
-        float r = mIsoLevel + half_sqrt_3 * static_cast<float>(subcube_size);
+        float r = mIsoLevel + half_sqrt_3 * static_cast<float>(size);
 
         for (auto sc : get_subcubes(index, size, mGridSize)) {
             Vec3_t<float> S = cube_center(cube_index_to_offset<float>(sc, mGridSize), subcube_size);
