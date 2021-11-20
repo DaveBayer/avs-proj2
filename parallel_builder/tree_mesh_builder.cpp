@@ -125,7 +125,7 @@ Vec3_t<T> cube_index_to_offset(uint i, uint grid_size)
     return Vec3_t<T>(i % grid_size, (i / grid_size) % grid_size, i / (grid_size * grid_size));
 }
 
-std::array<uint, 8UL> get_subcubes(uint index, uint size, uint gs)
+std::array<uint, 8UL> get_subcubes_idx(uint index, uint size, uint gs)
 {
     uint x_shift = size >> 1;   //  size / 2
     uint y_shift = x_shift * gs;
@@ -152,7 +152,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
         uint subcube_size = size >> 1;  //  size / 2
         float r = mIsoLevel + half_sqrt_3 * static_cast<float>(subcube_size) * mGridResolution;
 
-        for (auto sc : get_subcubes(index, size)) {
+        for (auto sc : get_subcubes_idx(index, size)) {
             Vec3_t<float> S = cube_center(cube_index_to_offset<float>(sc, mGridSize), subcube_size);
             S = { S.x * mGridResolution, S.y * mGridResolution, S.z * mGridResolution };
 
