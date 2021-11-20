@@ -153,7 +153,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
     auto cube_center = [this](uint i, uint s) -> Vec3_t<float>
     {
         return {
-            ((i % mGridSize) + s >> 1) * mGridResolution;
+            ((i % mGridSize) + s >> 1) * mGridResolution,
             (((i / mGridSize) % mGridSize) + s >> 1) * mGridResolution,
             ((i / (mGridSize * mGridSize)) + s >> 1) * mGridResolution
         };
