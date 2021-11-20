@@ -54,7 +54,7 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
     constexpr float half_sqrt_3 = static_cast<float>(sqrt(3.0) / 2.0);
 
     Vec3_t<float> S = { pos.x + half_size, pos.y + half_size, pos.z + half_size };
-    float r = mIsoLevel + half_sqrt_3 static_cast<float>(size);
+    float r = mIsoLevel + half_sqrt_3 * static_cast<float>(size);
 
     if (evaluateFieldAt(S, field) > r) {
         if (size > 1) {
