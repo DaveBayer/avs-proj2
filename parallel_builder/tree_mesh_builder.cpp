@@ -156,10 +156,10 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
         uint subcube_size = size >> 1;  //  size / 2
         float r = mIsoLevel + half_sqrt_3 * static_cast<float>(size);
 
-        for (auto sc : get_subcubes(index, size, mGridSize)) {
-            Vec3_t<float> S = cube_center(cube_index_to_offset<float>(sc, mGridSize), subcube_size);
-            
-            if (evaluateFieldAt(S, field) > r) {
+        Vec3_t<float> S = cube_center(cube_index_to_offset<float>(index, mGridSize), size);
+        if (evaluateFieldAt(S, field) > r) {
+
+            for (auto sc : get_subcubes(index, size, mGridSize)) {
 #               pragma omp task shared(totalTriangles) firstprivate(sc, subcube_size, field)
                 {
                     totalTriangles += decomposeOctree(sc, subcube_size, field);
