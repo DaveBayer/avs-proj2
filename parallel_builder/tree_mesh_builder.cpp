@@ -21,7 +21,7 @@ TreeMeshBuilder::TreeMeshBuilder(unsigned gridEdgeSize)
 {
 
 }
-
+/*
 template<typename T>
 std::array<Vec3_t<T>, 8UL> get_subcubes(Vec3_t<T> p, uint s)
 {
@@ -38,6 +38,7 @@ std::array<Vec3_t<T>, 8UL> get_subcubes(Vec3_t<T> p, uint s)
         { p.x + h, p.y + h, p.z + h }
     }};
 }
+*/
 
 template<typename T>
 Vec3_t<T> cube_center(Vec3_t<T> p, uint s)
@@ -46,7 +47,7 @@ Vec3_t<T> cube_center(Vec3_t<T> p, uint s)
 
     return { p.x + h, p.y + h, p.z + h };
 }
-
+/*
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
     uint totalTriangles = 0;
@@ -73,7 +74,7 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
 
     return totalTriangles;
 }
-
+*/
 /*
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
@@ -103,7 +104,7 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
 
     return totalTriangles;
 }
-*/
+
 unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 {
     // Suggested approach to tackle this problem is to add new method to
@@ -117,6 +118,72 @@ unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 #   pragma omp master
     {
         totalTriangles = decomposeOctree(Vec3_t<float>(0.f, 0.f, 0.f), mGridSize, field);
+    }
+
+    return totalTriangles;
+}
+*/
+template<typename T>
+Vec3_t<T> cube_index_to_offset(uint i, uint grid_size)
+{
+    return Vec3_t<T>(i % grid_size, (i / grid_size) % grid_size, i / (grid_size * grid_size));
+}
+
+std::array<uint, 8UL> get_subcubes(uint index, uint size, uint gs)
+{
+    uint x_shift = size / 2;
+    uint y_shift = x_shift * gs;
+    uint z_shift = y_shift * gs;
+
+    return std::array<uint> {{
+        index,
+        index + x_shift,
+        index + y_shift,
+        index + y_shift + x_shift,
+        index + z_shift,
+        index + z_shift + x_shift,
+        index + z_shift + y_shift,
+        index + z_shift + y_shift + x_shift
+    }};
+}
+
+uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricScalarField &field)
+{
+    uint totalTriangles = 0;
+    constexpr float half_sqrt_3 = static_cast<float>(sqrt(3.0) / 2.0);
+    
+    if (size > 1) {
+        uint subcube_size = size / 2;
+        float r = mIsoLevel + half_sqrt_3 * static_cast<float>(subcube_size);
+
+        for (auto sc : get_subcubes(index, size, mGridSize)) {
+            Vec3_t<float> S = cube_center(cube_index_to_offset<float>(sc, mGridSize), subcube_size);
+            
+            if (!(evaluateFieldAt(S, field) > r)) {
+#               pragma omp task shared(totalTriangles) firstprivate(sc, subcube_size, field)
+                {
+                    totalTriangles += decomposeOctree(sc, subcube_size, field);
+                }
+            }
+            
+        }
+
+#       pragma omp taskwait
+
+    } else
+        totalTriangles = buildCube(cube_index_to_offset(index), field);
+
+    return totalTriangles;
+}
+
+uint TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
+{
+    uint totalTriangles;
+
+#   pragma omp parallel
+#   pragma omp master
+    {
+        totalTriangles = decomposeOctree(0U, mGridSize, field);
     }
 
     return totalTriangles;
