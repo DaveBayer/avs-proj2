@@ -171,7 +171,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
 #       pragma omp taskwait
 
     } else
-        totalTriangles = buildCube(cube_index_to_offset<float>(index), field);
+        totalTriangles = buildCube(cube_index_to_offset<float>(index, mGridSize), field);
 
     return totalTriangles;
 }
