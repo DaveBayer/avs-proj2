@@ -141,15 +141,6 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
         }};
     };
 
-    auto cube_index_to_offset = [this](uint i) -> Vec3_t<float>
-    {
-        return {
-            static_cast<float>(i % mGridSize),
-            static_cast<float>((i / mGridSize) % mGridSize),
-            static_cast<float>(i / (mGridSize * mGridSize))
-        };
-    };
-
     auto cube_center = [this](uint i, uint s) -> Vec3_t<float>
     {
         return {
@@ -159,26 +150,30 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
         };
     };
 
+    auto cube_index_to_offset = [this](uint i) -> Vec3_t<float>
+    {
+        return {
+            static_cast<float>(i % mGridSize),
+            static_cast<float>((i / mGridSize) % mGridSize),
+            static_cast<float>(i / (mGridSize * mGridSize))
+        };
+    };
+
     uint totalTriangles = 0;
     
     if (size > 1) {
         uint subcube_size = size >> 1;  //  size / 2
         float r = sphere_radius(size);
 
-        for (auto sc : decompose(index, size)) {
-            /*
-            Vec3_t<float> sc_vec = cube_index_to_offset<float>(sc, mGridSize);
-            sc_vec = { sc_vec.x * mGridResolution, sc_vec.y * mGridResolution, sc_vec.z * mGridResolution };
-            Vec3_t<float> S = cube_center(sc_vec, subcube_size);
-            */
-            Vec3_t<float> S = cube_center(sc, subcube_size);
+        for (auto subcube_index : decompose(index, size)) {
+            Vec3_t<float> S = cube_center(subcube_index, subcube_size);
 
-            if (!(evaluateFieldAt(S, field) > r)) {
-#               pragma omp task shared(totalTriangles) firstprivate(sc, subcube_size, field)
+//            if (!(evaluateFieldAt(S, field) > r)) {
+#               pragma omp task shared(totalTriangles) firstprivate(subcube_index, subcube_size, field)
                 {
-                    totalTriangles += decomposeOctree(sc, subcube_size, field);
+                    totalTriangles += decomposeOctree(subcube_index, subcube_size, field);
                 }
-            }
+  //          }
             
         }
 
