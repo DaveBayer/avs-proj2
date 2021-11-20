@@ -164,7 +164,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
                 {
                     totalTriangles += decomposeOctree(sc, subcube_size, field);
                 }
-            }
+//            }
             
         }
 
