@@ -70,7 +70,7 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
     return totalTriangles;
 }
 */
-
+/*
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
     uint totalTriangles = 0;
@@ -117,8 +117,8 @@ unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 
     return totalTriangles;
 }
+*/
 
-/*
 template<typename T>
 Vec3_t<T> cube_index_to_offset(uint i, uint grid_size)
 {
@@ -154,7 +154,8 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
 
         for (auto sc : get_subcubes(index, size, mGridSize)) {
             Vec3_t<float> S = cube_center(cube_index_to_offset<float>(sc, mGridSize), subcube_size);
-            
+            S = { S.x * mGridResolution, S.y * mGridResolution, S.z * mGridResolution };
+
             if (!(evaluateFieldAt(S, field) > r)) {
 //  #               pragma omp task shared(totalTriangles) firstprivate(sc, subcube_size, field)
                 {
@@ -184,7 +185,7 @@ uint TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 
     return totalTriangles;
 }
-*/
+
 float TreeMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const ParametricScalarField &field)
 {
     // NOTE: This method is called from "buildCube(...)"!
