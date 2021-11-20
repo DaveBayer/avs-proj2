@@ -43,7 +43,7 @@ std::array<Vec3_t<T>, 8UL> get_subcubes(Vec3_t<T> p, uint s)
 template<typename T>
 Vec3_t<T> cube_center(Vec3_t<T> p, uint s)
 {
-    T h = static_cast<T>(s);
+    T h = static_cast<T>(s) / 2;
 
     return { p.x + h, p.y + h, p.z + h };
 }
@@ -150,7 +150,7 @@ std::array<uint, 8UL> get_subcubes(uint index, uint size, uint gs)
 uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricScalarField &field)
 {
     uint totalTriangles = 0;
-    constexpr float half_sqrt_3 = static_cast<float>(sqrt(3.0) / 2.0);
+    constexpr float half_sqrt_3 = static_cast<float>(sqrt(3.0));
     
     if (size > 1) {
         uint subcube_size = size >> 1;  //  size / 2
@@ -159,7 +159,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
         for (auto sc : get_subcubes(index, size, mGridSize)) {
             Vec3_t<float> S = cube_center(cube_index_to_offset<float>(sc, mGridSize), subcube_size);
             
-            if (evaluateFieldAt(S, field) > r) {
+            if (!(evaluateFieldAt(S, field) > r)) {
 #               pragma omp task shared(totalTriangles) firstprivate(sc, subcube_size, field)
                 {
                     totalTriangles += decomposeOctree(sc, subcube_size, field);
