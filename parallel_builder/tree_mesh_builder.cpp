@@ -55,13 +55,13 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
     Vec3_t<float> S = cube_center(pos, size);
     float r = mIsoLevel + half_sqrt_3 * static_cast<float>(size);
 
-    if (!(evaluateFieldAt(S, field) > r)) {
+    if (evaluateFieldAt(S, field) > r) {
         if (size > 1) {
 
-            for (auto sc_pos : get_subcubes(pos, size)) {
-#               pragma omp task shared(totalTriangles) firstprivate(sc_pos, size, field)
+            for (auto sc : get_subcubes(pos, size)) {
+#               pragma omp task shared(totalTriangles) firstprivate(sc, size, field)
                 {
-                    totalTriangles += decomposeOctree(sc_pos, size / 2, field);
+                    totalTriangles += decomposeOctree(sc, size / 2, field);
                 }
             }
 
