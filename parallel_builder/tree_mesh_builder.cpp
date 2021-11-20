@@ -21,31 +21,26 @@ TreeMeshBuilder::TreeMeshBuilder(unsigned gridEdgeSize)
 {
 
 }
-/*
-template<typename T>
-std::array<Vec3_t<T>, 8UL> get_subcubes(Vec3_t<T> p, uint s)
-{
-    T h = static_cast<T>(s) / 2;
 
-    return std::array<Vec3_t<T>, 8UL> {{
+TreeMeshBuilder::Subcubes TreeMeshBuilder::get_subcubes(Vec3_t<float> p, uint size)
+{
+    float sh = static_cast<float>(size >> 1) * mGridResolution;   //  (size / 2) * mGridResolution
+    return Subcubes {{
         { p.x, p.y, p.z },
-        { p.x + h, p.y, p.z },
-        { p.x, p.y + h, p.z },
-        { p.x, p.y, p.z + h },
-        { p.x + h, p.y + h, p.z },
-        { p.x, p.y + h, p.z + h },
-        { p.x + h, p.y, p.z + h },
-        { p.x + h, p.y + h, p.z + h }
+        { p.x + sh, p.y, p.z },
+        { p.x, p.y + sh, p.z },
+        { p.x, p.y, p.z + sh },
+        { p.x + sh, p.y + sh, p.z },
+        { p.x, p.y + sh, p.z + sh },
+        { p.x + sh, p.y, p.z + sh },
+        { p.x + sh, p.y + sh, p.z + sh }
     }};
 }
-*/
 
-template<typename T>
-Vec3_t<T> cube_center(Vec3_t<T> p, uint s)
+Vec3_t<float> TreeMeshBuilder::cube_center(Vec3_t<float> p, uint s)
 {
-    T h = static_cast<T>(s) / 2;
-
-    return { p.x + h, p.y + h, p.z + h };
+    float sh = static_cast<float>(s >> 1) * mGridResolution;
+    return { p.x + sh, p.y + sh, p.z + sh };
 }
 /*
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
@@ -75,15 +70,15 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
     return totalTriangles;
 }
 */
-/*
+
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
     uint totalTriangles = 0;
     constexpr float half_sqrt_3 = static_cast<float>(sqrt(3.0) / 2.0);
     
     if (size > 1) {
-        uint subcube_size = size / 2;
-        float r = mIsoLevel + half_sqrt_3 * static_cast<float>(subcube_size);
+        uint subcube_size = size >> 1;
+        float r = mIsoLevel + half_sqrt_3 * static_cast<float>(subcube_size) * mGridResolution;
 
         for (auto sc : get_subcubes(pos, size)) {
             Vec3_t<float> S = cube_center(sc, subcube_size);
@@ -122,7 +117,8 @@ unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 
     return totalTriangles;
 }
-*/
+
+/*
 template<typename T>
 Vec3_t<T> cube_index_to_offset(uint i, uint grid_size)
 {
@@ -154,7 +150,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
     
     if (size > 1) {
         uint subcube_size = size >> 1;  //  size / 2
-        float r = mIsoLevel + half_sqrt_3 * static_cast<float>(subcube_size);
+        float r = mIsoLevel + half_sqrt_3 * static_cast<float>(subcube_size) * mGridResolution;
 
         for (auto sc : get_subcubes(index, size, mGridSize)) {
             Vec3_t<float> S = cube_center(cube_index_to_offset<float>(sc, mGridSize), subcube_size);
@@ -188,7 +184,7 @@ uint TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 
     return totalTriangles;
 }
-
+*/
 float TreeMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const ParametricScalarField &field)
 {
     // NOTE: This method is called from "buildCube(...)"!
