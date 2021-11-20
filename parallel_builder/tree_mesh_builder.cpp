@@ -43,7 +43,7 @@ std::array<Vec3_t<T>, 8UL> get_subcubes(Vec3_t<T> p, uint s)
 template<typename T>
 Vec3_t<T> cube_center(Vec3_t<T> p, uint s)
 {
-    T h = static_cast<T>(s) / 2;
+    T h = static_cast<T>(s);
 
     return { p.x + h, p.y + h, p.z + h };
 }
