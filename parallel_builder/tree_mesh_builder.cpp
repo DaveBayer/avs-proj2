@@ -135,7 +135,7 @@ std::array<uint, 8UL> get_subcubes(uint index, uint size, uint gs)
     uint y_shift = x_shift * gs;
     uint z_shift = y_shift * gs;
 
-    return std::array<uint> {{
+    return std::array<uint, 8UL> {{
         index,
         index + x_shift,
         index + y_shift,
