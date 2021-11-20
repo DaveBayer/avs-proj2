@@ -58,8 +58,8 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
     if (evaluateFieldAt(S, field) > r) {
         if (size > 1) {
 
-#           pragma omp task shared(totalTriangles)
             for (auto sc_pos : get_subcubes(pos, size)) {
+#               pragma omp task shared(totalTriangles)
                 totalTriangles += decomposeOctree(sc_pos, half_size, field);
             }
 
