@@ -20,7 +20,7 @@ public:
 
 protected:
     uint decomposeOctree(Vec3_t<float>, uint, const ParametricScalarField &);
-    uint decomposeOctree(uint index, uint size, const ParametricScalarField &field)
+    uint decomposeOctree(uint index, uint size, const ParametricScalarField &field);
     unsigned marchCubes(const ParametricScalarField &field);
     float evaluateFieldAt(const Vec3_t<float> &pos, const ParametricScalarField &field);
     void emitTriangle(const Triangle_t &triangle);
