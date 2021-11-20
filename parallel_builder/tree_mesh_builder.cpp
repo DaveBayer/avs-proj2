@@ -46,7 +46,7 @@ Vec3_t<T> cube_center(Vec3_t<T> p, uint s)
 
     return { p.x + h, p.y + h, p.z + h };
 }
-
+/*
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
     uint totalTriangles = 0;
@@ -71,8 +71,8 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
 
     return totalTriangles;
 }
+*/
 
-/*
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
     uint totalTriangles = 0;
@@ -98,7 +98,7 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
 
     return totalTriangles;
 }
-*/
+
 unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 {
     // Suggested approach to tackle this problem is to add new method to
