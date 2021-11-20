@@ -130,8 +130,8 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
     auto decompose = [this](uint index, uint size) -> std::array<uint, 8UL>
     {
         uint x_shift = size >> 1;   //  size / 2
-        uint y_shift = x_shift * gs;
-        uint z_shift = y_shift * gs;
+        uint y_shift = x_shift * mGridSize;
+        uint z_shift = y_shift * mGridSize;
 
         return std::array<uint, 8UL> {{
             index,                        index + x_shift,
@@ -153,9 +153,9 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
     auto cube_center = [this](uint i, uint s) -> Vec3_t<float>
     {
         return {
-            ((i % grid_size) + s >> 1) * mGridResolution;
-            (((i / grid_size) % grid_size) + s >> 1) * mGridResolution,
-            ((i / (grid_size * grid_size)) + s >> 1) * mGridResolution
+            ((i % mGridSize) + s >> 1) * mGridResolution;
+            (((i / mGridSize) % mGridSize) + s >> 1) * mGridResolution,
+            ((i / (mGridSize * mGridSize)) + s >> 1) * mGridResolution
         };
     };
 
