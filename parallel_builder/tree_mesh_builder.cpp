@@ -154,7 +154,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
     
     if (size > 1) {
         uint subcube_size = size >> 1;  //  size / 2
-        float r = mIsoLevel + half_sqrt_3 * static_cast<float>(size);
+        float r = mIsoLevel + half_sqrt_3 * static_cast<float>(subcube_size);
 
         for (auto sc : get_subcubes(index, size, mGridSize)) {
             Vec3_t<float> S = cube_center(cube_index_to_offset<float>(sc, mGridSize), subcube_size);
