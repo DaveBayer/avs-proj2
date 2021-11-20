@@ -114,7 +114,7 @@ unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
     uint totalTriangles;
 
 #   pragma omp parallel
-#   pragma omp master lastprivate(totalTriangles)
+#   pragma omp master
     {
         totalTriangles = decomposeOctree(Vec3_t<float>(0.f, 0.f, 0.f), mGridSize, field);
     }
