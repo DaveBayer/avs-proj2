@@ -163,17 +163,17 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
     
     if (size > 1) {
         uint subcube_size = size >> 1;  //  size / 2
-        float r = sphere_radius(size);
+        float r = sphere_radius(subcube_size);
 
         for (auto subcube_index : decompose(index, size)) {
             Vec3_t<float> S = cube_center(subcube_index, subcube_size);
 
-//            if (!(evaluateFieldAt(S, field) > r)) {
+            if (!(evaluateFieldAt(S, field) > r)) {
 #               pragma omp task shared(totalTriangles) firstprivate(subcube_index, subcube_size, field)
                 {
                     totalTriangles += decomposeOctree(subcube_index, subcube_size, field);
                 }
-  //          }
+            }
             
         }
 
