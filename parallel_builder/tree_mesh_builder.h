@@ -25,6 +25,8 @@ protected:
     float evaluateFieldAt(const Vec3_t<float> &pos, const ParametricScalarField &field);
     void emitTriangle(const Triangle_t &triangle);
     const Triangle_t *getTrianglesArray() const { return mTriangles.data(); }
+public:
+    static uint depth_limit;
 private:
     
     std::vector<Triangle_t> mTriangles;
