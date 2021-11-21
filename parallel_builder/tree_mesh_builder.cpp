@@ -22,7 +22,7 @@ const uint TreeMeshBuilder::depth_limit = 8U;
 TreeMeshBuilder::TreeMeshBuilder(unsigned gridEdgeSize)
     : BaseMeshBuilder(gridEdgeSize, "Octree")
 {
-    for (uint i = depth_limit; i < mGridSize; i <<= 1) {
+    for (uint i = depth_limit; i <= mGridSize; i <<= 1) {
         double r = mIsoLevel + (sqrt(3.0) / 2.0) * static_cast<double>(i) * mGridResolution;
         sphere_radius[i] = static_cast<float>(r);
     }
