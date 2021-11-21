@@ -100,6 +100,7 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
 #       pragma omp taskwait
 
     } else {
+#       pragma omp parallel for reduction(+: totalTriangles) firstprivate(pos, field)
         for (uint i = 0U; i < depth_limit; i++) {
             float z = pos.z + static_cast<float>(i);
 
