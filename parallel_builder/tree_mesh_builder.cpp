@@ -191,8 +191,8 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
 {
     auto sphere_radius = [this](uint size) -> float
     {
-        constexpr float half_sqrt_3 = static_cast<float>(sqrt(3.0) / 2.0);
-        return mIsoLevel + half_sqrt_3 * static_cast<float>(size) * mGridResolution;
+        constexpr double half_sqrt_3 = sqrt(3.0) / 2.0;
+        return mIsoLevel + half_sqrt_3 * static_cast<double>(size) * mGridResolution;
     };
 
     auto decompose = [this](uint index, uint size) -> std::array<uint, 8UL>
@@ -225,7 +225,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
 
     uint totalTriangles = 0;
     
-    if (size >= depth_limit) {
+    if (size > depth_limit) {
         uint subcube_size = size >> 1;  //  size / 2
 
         for (auto subcube_index : decompose(index, size)) {
