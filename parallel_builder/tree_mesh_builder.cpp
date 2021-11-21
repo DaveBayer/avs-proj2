@@ -73,7 +73,7 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<uint> pos, uint size, const Paramet
         }};
     };
 
-    auto cube_center_denorm = [this](Vec3_t<float> p, uint size) -> Vec3_t<float>
+    auto cube_center_denorm = [this](Vec3_t<uint> p, uint size) -> Vec3_t<float>
     {
         uint sh = size >> 1;  //  size / 2
         return { (p.x + sh) * mGridResolution, (p.y + sh) * mGridResolution, (p.z + sh) * mGridResolution };
