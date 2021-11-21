@@ -19,7 +19,7 @@ LoopMeshBuilder::LoopMeshBuilder(unsigned gridEdgeSize)
 {
 
 }
-
+/*
 unsigned LoopMeshBuilder::marchCubes(const ParametricScalarField &field)
 {
     // 1. Compute total number of cubes in the grid.
@@ -39,6 +39,39 @@ unsigned LoopMeshBuilder::marchCubes(const ParametricScalarField &field)
         // 4. Evaluate "Marching Cube" at given position in the grid and
         //    store the number of triangles generated.
         totalTriangles += buildCube(cubeOffset, field);
+    }
+
+    // 5. Return total number of triangles generated.
+    return totalTriangles;
+}
+*/
+
+unsigned LoopMeshBuilder::marchCubes(const ParametricScalarField &field)
+{
+    // 1. Compute total number of cubes in the grid.
+    size_t totalCubesCount = mGridSize*mGridSize*mGridSize;
+
+    unsigned totalTriangles = 0;
+
+    // 2. Loop over each coordinate in the 3D grid.
+#   pragma omp parallel for reduction(+: totalTriangles) collapse(3)
+    for(uint i = 0U; i < mGridSize; i++) {
+        for (uint j = 0U; j < mGridSize; j++) {
+            for (uint k = 0U; k < mGridSize; k++) {
+                Vec3_t<float> cube_position(k, j, i);
+                totalTriangles += buildCube(cube_position, field);
+            }
+        }
+/*
+        // 3. Compute 3D position in the grid.
+        Vec3_t<float> cubeOffset( i % mGridSize,
+                                 (i / mGridSize) % mGridSize,
+                                  i / (mGridSize*mGridSize));
+
+        // 4. Evaluate "Marching Cube" at given position in the grid and
+        //    store the number of triangles generated.
+        totalTriangles += buildCube(cubeOffset, field);
+*/
     }
 
     // 5. Return total number of triangles generated.
