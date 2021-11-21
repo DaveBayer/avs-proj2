@@ -11,6 +11,8 @@
 #ifndef TREE_MESH_BUILDER_H
 #define TREE_MESH_BUILDER_H
 
+#include <unordered_map>
+
 #include "base_mesh_builder.h"
 
 class TreeMeshBuilder : public BaseMeshBuilder
@@ -27,9 +29,9 @@ protected:
     void emitTriangle(const Triangle_t &triangle);
     const Triangle_t *getTrianglesArray() const { return mTriangles.data(); }
 public:
-    static uint depth_limit;
+    static const uint depth_limit;
 private:
-    
+    std::unordered_map<uint, float> sphere_radius;
     std::vector<Triangle_t> mTriangles;
 };
 
