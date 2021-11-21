@@ -232,18 +232,34 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
         for (auto subcube_index : decompose(index, size)) {
             Vec3_t<float> S = cube_center(subcube_index, subcube_size);
 
-//            if (!(evaluateFieldAt(S, field) > r)) {
+            if (!(evaluateFieldAt(S, field) > r)) {
 #               pragma omp task shared(totalTriangles) firstprivate(subcube_index, subcube_size, field)
                 {
                     totalTriangles += decomposeOctree(subcube_index, subcube_size, field);
                 }
-//            }
-            
+            }
         }
 
 #       pragma omp taskwait
 
     } else {
+        Vec3_t<float> p = cube_index_to_offset(index);
+
+#       pragma omp parallel for reduction(+: totalTriangles) firstprivate(index, mGridSize, field)
+        for (uint i = 0U; i < depth_limit; i++) {
+            float z = p.z + static_cast<float>(i);
+
+            for (uint j = 0U; j < depth_limit; j++) {
+                float y = p.y + static_cast<float>(j);
+
+                for (uint k = 0U; k < depth_limit; k++) {
+                    float x = p.x + static_cast<float>(k);
+                    totalTriangles += buildCube(Vec3_t<float>(x, y, z), field);
+                }
+            }
+        }
+
+/*        
 #       pragma omp parallel for reduction(+: totalTriangles) firstprivate(index, mGridSize, field)
         for (uint i = 0U; i < depth_limit; i++) {
             for (uint j = 0U; j < depth_limit; j++) {
@@ -253,6 +269,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
                 }
             }
         }
+*/
     }
 
     return totalTriangles;
