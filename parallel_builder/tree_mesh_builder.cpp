@@ -53,7 +53,7 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
     return totalTriangles;
 }
 */
-
+/*
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
 {
     auto sphere_radius = [this](uint size) -> float
@@ -135,8 +135,8 @@ unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 
     return totalTriangles;
 }
+*/
 
-/*
 uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricScalarField &field)
 {
     auto sphere_radius = [this](uint size) -> float
@@ -186,12 +186,12 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
         for (auto subcube_index : decompose(index, size)) {
             Vec3_t<float> S = cube_center(subcube_index, subcube_size);
 
-            if (!(evaluateFieldAt(S, field) > r)) {
+//            if (!(evaluateFieldAt(S, field) > r)) {
 //#               pragma omp task shared(totalTriangles) firstprivate(subcube_index, subcube_size, field)
                 {
                     totalTriangles += decomposeOctree(subcube_index, subcube_size, field);
                 }
-            }
+//            }
             
         }
 
@@ -223,7 +223,7 @@ uint TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 
     return totalTriangles;
 }
-*/
+
 float TreeMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const ParametricScalarField &field)
 {
     // NOTE: This method is called from "buildCube(...)"!
@@ -237,7 +237,7 @@ float TreeMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const Parametri
 
     // 2. Find minimum square distance from points "pos" to any point in the
     //    field.
-#   pragma omp parallel for simd reduction(min: value) simdlen(64)
+#   pragma omp simd reduction(min: value) simdlen(64)
     for(unsigned i = 0; i < count; ++i)
     {
         float distanceSquared  = (pos.x - pPoints[i].x) * (pos.x - pPoints[i].x);
