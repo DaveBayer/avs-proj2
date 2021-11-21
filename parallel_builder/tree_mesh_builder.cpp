@@ -17,7 +17,7 @@
 #include "tree_mesh_builder.h"
 
 //  depth_limit == 2^n
-uint TreeMeshBuilder::depth_limit = 4U;
+uint TreeMeshBuilder::depth_limit = 8U;
 
 TreeMeshBuilder::TreeMeshBuilder(unsigned gridEdgeSize)
     : BaseMeshBuilder(gridEdgeSize, "Octree")
@@ -105,7 +105,6 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
 
             for (uint j = 0U; j < depth_limit; j++) {
                 float y = pos.y + static_cast<float>(j);
-
 
                 for (uint k = 0U; k < depth_limit; k++) {
                     float x = pos.x + static_cast<float>(k);
