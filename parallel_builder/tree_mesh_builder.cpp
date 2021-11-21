@@ -243,6 +243,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
 #       pragma omp taskwait
 
     } else {
+/*
         Vec3_t<float> p = cube_index_to_offset(index);
 
 #       pragma omp parallel for reduction(+: totalTriangles) firstprivate(index, mGridSize, field)
@@ -258,8 +259,8 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
                 }
             }
         }
-
-/*        
+*/
+        
 #       pragma omp parallel for reduction(+: totalTriangles) firstprivate(index, mGridSize, field)
         for (uint i = 0U; i < depth_limit; i++) {
             for (uint j = 0U; j < depth_limit; j++) {
@@ -269,7 +270,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
                 }
             }
         }
-*/
+
     }
 
     return totalTriangles;
