@@ -62,12 +62,12 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
     auto decompose = [](Vec3_t<float> p, uint size) -> std::array<Vec3_t<float>, 8UL>
     {
         float sh = static_cast<float>(size >> 1);   //  (size / 2)
-        return {
+        return {{
             { p.x, p.y, p.z },              { p.x + sh, p.y, p.z },
             { p.x, p.y + sh, p.z },         { p.x, p.y, p.z + sh },
             { p.x + sh, p.y + sh, p.z },    { p.x, p.y + sh, p.z + sh },
             { p.x + sh, p.y, p.z + sh },    { p.x + sh, p.y + sh, p.z + sh }
-        };
+        }};
     };
 
     auto denormalize = [this](Vec3_t<float> p) -> Vec3_t<float>
