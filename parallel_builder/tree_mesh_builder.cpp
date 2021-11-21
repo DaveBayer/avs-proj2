@@ -212,8 +212,8 @@ uint TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 {
     uint totalTriangles;
 
-//#   pragma omp parallel
-//#   pragma omp master
+#   pragma omp parallel
+#   pragma omp master
     {
         totalTriangles = decomposeOctree(0U, mGridSize, field);
     }
