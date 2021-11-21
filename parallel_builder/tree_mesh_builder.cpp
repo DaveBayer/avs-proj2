@@ -250,7 +250,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
         for (uint i = 0U; i < depth_limit; i++) {
             for (uint j = 0U; j < depth_limit; j++) {
                 for (uint k = 0U; k < depth_limit; k++) {
-                    totalTriangles += buildCube(cube_offset(idx, k, j, i), field);
+                    totalTriangles += buildCube(cube_offset(index, k, j, i), field);
                 }
             }
         }
