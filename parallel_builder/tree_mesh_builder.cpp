@@ -83,7 +83,7 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
         float r = sphere_radius(subcube_size);
 
         for (auto sc : decompose(pos, size)) {
-            Vec3_t<float> S = cube_center(sc, subcube_size);
+            Vec3_t<float> S = cube_center_denormalized(sc, subcube_size);
             
             if (!(evaluateFieldAt(S, field) > r)) {
 #               pragma omp task shared(totalTriangles) firstprivate(sc, subcube_size, field)
