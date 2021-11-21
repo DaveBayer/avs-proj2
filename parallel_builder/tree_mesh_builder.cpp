@@ -70,9 +70,10 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
         }};
     };
 
-    auto denormalize = [this](Vec3_t<float> p) -> Vec3_t<float>
+    auto cube_center_denormalized = [this](Vec3_t<float> p, uint size) -> Vec3_t<float>
     {
-        return { p.x * mGridResolution, p.y * mGridResolution, p.z * mGridResolution };
+        float sh = static_cast<float>(size >> 1);  //  size / 2
+        return { (p.x + sh) * mGridResolution, (p.y + sh) * mGridResolution, (p.z + sh) * mGridResolution };
     };
 
     uint totalTriangles = 0;
@@ -82,7 +83,7 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
         float r = sphere_radius(subcube_size);
 
         for (auto sc : decompose(pos, size)) {
-            Vec3_t<float> S = denormalize(cube_center(sc, subcube_size));
+            Vec3_t<float> S = cube_center(sc, subcube_size);
             
             if (!(evaluateFieldAt(S, field) > r)) {
 #               pragma omp task shared(totalTriangles) firstprivate(sc, subcube_size, field)
