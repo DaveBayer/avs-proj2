@@ -11,8 +11,6 @@
 #ifndef TREE_MESH_BUILDER_H
 #define TREE_MESH_BUILDER_H
 
-#include <unordered_map>
-
 #include "base_mesh_builder.h"
 
 class TreeMeshBuilder : public BaseMeshBuilder
@@ -31,7 +29,6 @@ protected:
 public:
     static const uint depth_limit;
 private:
-    std::unordered_map<uint, float> sphere_radius;
     std::vector<Triangle_t> mTriangles;
 };
 

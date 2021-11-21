@@ -225,7 +225,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
 
     uint totalTriangles = 0;
     
-    if (size > depth_limit) {
+    if (size >= depth_limit) {
         uint subcube_size = size >> 1;  //  size / 2
 
         for (auto subcube_index : decompose(index, size)) {
@@ -258,13 +258,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
 }
 
 uint TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
-{/*
-    for (uint i = mGridSize; i > depth_limit; i >>= 1) {
-        double r = mIsoLevel + (sqrt(3.0) / 2.0) * static_cast<double>(i) * mGridResolution;
-        sphere_radius[i] = static_cast<float>(r);
-        std::cout << i << ":\tr: " << r << "\tiso: " << mIsoLevel << std::endl;
-    }
-*/
+{
     uint totalTriangles;
 
 #   pragma omp parallel
