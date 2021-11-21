@@ -218,13 +218,9 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
         };
     };
 
-    auto cube_offset = [this](uint i, uint x_sh = 0U, uint y_sh = 0U, uint z_sh = 0U) -> Vec3_t<float>
+    auto cube_index_to_offset = [this](uint i) -> Vec3_t<float>
     {
-        return Vec3_t<float>(
-            (i % mGridSize) + x_sh,
-            ((i / mGridSize) % mGridSize) + y_sh,
-            (i / (mGridSize * mGridSize)) + z_sh
-        );
+        return Vec3_t<float>(i % mGridSize, (i / mGridSize) % mGridSize, i / (mGridSize * mGridSize));
     };
 
     uint totalTriangles = 0;
@@ -250,7 +246,8 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
         for (uint i = 0U; i < depth_limit; i++) {
             for (uint j = 0U; j < depth_limit; j++) {
                 for (uint k = 0U; k < depth_limit; k++) {
-                    totalTriangles += buildCube(cube_offset(index, k, j, i), field);
+                    uint idx = index + i * mGridSize * mGridSize + j * mGridSize + k;
+                    totalTriangles += buildCube(cube_index_to_offset(idx), field);
                 }
             }
         }
