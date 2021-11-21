@@ -170,11 +170,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
 
     auto cube_index_to_offset = [this](uint i) -> Vec3_t<float>
     {
-        return {
-            static_cast<float>(i % mGridSize),
-            static_cast<float>((i / mGridSize) % mGridSize),
-            static_cast<float>(i / (mGridSize * mGridSize))
-        };
+        return Vec3_t<float>(i % mGridSize, (i / mGridSize) % mGridSize, i / (mGridSize * mGridSize));
     };
 
     uint totalTriangles = 0;
