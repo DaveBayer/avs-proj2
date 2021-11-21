@@ -22,11 +22,7 @@ const uint TreeMeshBuilder::depth_limit = 8U;
 TreeMeshBuilder::TreeMeshBuilder(unsigned gridEdgeSize)
     : BaseMeshBuilder(gridEdgeSize, "Octree")
 {
-    for (uint i = mGridSize; i > depth_limit; i >>= 1) {
-        double r = mIsoLevel + (sqrt(3.0) / 2.0) * static_cast<double>(i) * mGridResolution;
-        sphere_radius[i] = static_cast<float>(r);
-        std::cout << i << ":\tr: " << r << std::endl;
-    }
+
 }
 /*
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<uint> pos, uint size, const ParametricScalarField &field)
@@ -257,6 +253,12 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
 
 uint TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 {
+    for (uint i = mGridSize; i > depth_limit; i >>= 1) {
+        double r = mIsoLevel + (sqrt(3.0) / 2.0) * static_cast<double>(i) * mGridResolution;
+        sphere_radius[i] = static_cast<float>(r);
+        std::cout << i << ":\tr: " << r << "\tiso: " << mIsoLevel << << std::endl;
+    }
+    
     uint totalTriangles;
 
 #   pragma omp parallel
