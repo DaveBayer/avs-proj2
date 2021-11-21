@@ -25,6 +25,7 @@ TreeMeshBuilder::TreeMeshBuilder(unsigned gridEdgeSize)
     for (uint i = mGridSize; i > depth_limit; i >>= 1) {
         double r = mIsoLevel + (sqrt(3.0) / 2.0) * static_cast<double>(i) * mGridResolution;
         sphere_radius[i] = static_cast<float>(r);
+        std::cout << i << ":\tr: " << r << std::endl;
     }
 }
 /*
