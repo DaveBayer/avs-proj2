@@ -17,7 +17,7 @@
 #include "tree_mesh_builder.h"
 
 //  depth_limit == 2^n
-uint TreeMeshBuilder::depth_limit = 8U;
+uint TreeMeshBuilder::depth_limit = 16U;
 
 TreeMeshBuilder::TreeMeshBuilder(unsigned gridEdgeSize)
     : BaseMeshBuilder(gridEdgeSize, "Octree")
