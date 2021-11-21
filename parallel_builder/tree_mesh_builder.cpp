@@ -194,6 +194,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
 #       pragma omp taskwait
 
     } else {
+#       pragma omp parallel for reduction(+: totalTriangles) firstprivate(index, mGridSize, field)
         for (uint i = 0U; i < depth_limit; i++) {
             for (uint j = 0U; j < depth_limit; j++) {
                 for (uint k = 0U; k < depth_limit; k++) {
