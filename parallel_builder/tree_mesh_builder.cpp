@@ -100,23 +100,18 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const Parame
 #       pragma omp taskwait
 
     } else {
-        float z = pos.z;
-
         for (uint i = 0U; i < depth_limit; i++) {
-            float y = pos.y;
+            float z = pos.z + static_cast<float>(i);
 
             for (uint j = 0U; j < depth_limit; j++) {
-                float x = pos.x;
+                float y = pos.y + static_cast<float>(j);
+
 
                 for (uint k = 0U; k < depth_limit; k++) {
+                    float x = pos.x + static_cast<float>(k);
                     totalTriangles += buildCube(Vec3_t<float>(x, y, z), field);
-                    x += 1.f;
                 }
-
-                y += 1.f;
             }
-
-            z += 1.f;
         }
     }
 
