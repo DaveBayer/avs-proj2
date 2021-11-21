@@ -19,6 +19,7 @@ public:
     TreeMeshBuilder(unsigned gridEdgeSize);
 
 protected:
+    uint decomposeOctree(Vec3_t<uint>, uint, const ParametricScalarField &);
     uint decomposeOctree(Vec3_t<float>, uint, const ParametricScalarField &);
     uint decomposeOctree(uint index, uint size, const ParametricScalarField &field);
     unsigned marchCubes(const ParametricScalarField &field);
