@@ -25,6 +25,7 @@ TreeMeshBuilder::TreeMeshBuilder(unsigned gridEdgeSize)
     for (uint i = depth_limit; i < mGridSize; i << 1) {
         double r = mIsoLevel + (sqrt(3.0) / 2.0) * static_cast<double>(i) * mGridResolution;
         sphere_radius[i] = static_cast<float>(r);
+        std::cout << i << ":\tr: " << r << std::endl;
     }
 }
 /*
@@ -228,7 +229,7 @@ uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricSca
         for (auto subcube_index : decompose(index, size)) {
             Vec3_t<float> S = cube_center(subcube_index, subcube_size);
 
-            if (!(evaluateFieldAt(S, field) > sphere_radius[size])) {
+            if (!(evaluateFieldAt(S, field) > sphere_radius.at(size))) {
 #               pragma omp task shared(totalTriangles) firstprivate(subcube_index, subcube_size, field)
                 {
                     totalTriangles += decomposeOctree(subcube_index, subcube_size, field);
