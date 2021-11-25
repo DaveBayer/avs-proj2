@@ -104,17 +104,11 @@ unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 
 float TreeMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const ParametricScalarField &field)
 {
-    // NOTE: This method is called from "buildCube(...)"!
-
-    // 1. Store pointer to and number of 3D points in the field
-    //    (to avoid "data()" and "size()" call in the loop).
     const Vec3_t<float> *pPoints = field.getPoints().data();
     const unsigned count = unsigned(field.getPoints().size());
 
     float value = std::numeric_limits<float>::max();
 
-    // 2. Find minimum square distance from points "pos" to any point in the
-    //    field.
 #   pragma omp simd reduction(min: value) simdlen(64)
     for(unsigned i = 0; i < count; ++i)
     {
@@ -122,12 +116,9 @@ float TreeMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const Parametri
         distanceSquared       += (pos.y - pPoints[i].y) * (pos.y - pPoints[i].y);
         distanceSquared       += (pos.z - pPoints[i].z) * (pos.z - pPoints[i].z);
 
-        // Comparing squares instead of real distance to avoid unnecessary
-        // "sqrt"s in the loop.
         value = value > distanceSquared ? distanceSquared : value;
     }
 
-    // 3. Finally take square root of the minimal square distance to get the real distance
     return sqrt(value);
 }
 
@@ -135,7 +126,7 @@ void TreeMeshBuilder::emitTriangle(const BaseMeshBuilder::Triangle_t &triangle)
 {
 #   pragma omp critical
     {
-        if (size + 1 >= capacity) {
+        if (size >= capacity) {
             capacity += realloc_amount;
             triangles = static_cast<Triangle_t *>(realloc(triangles, capacity * sizeof(Triangle_t)));
 
