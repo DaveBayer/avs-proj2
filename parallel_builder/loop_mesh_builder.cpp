@@ -14,34 +14,39 @@
 
 #include "loop_mesh_builder.h"
 
-LoopMeshBuilder::LoopMeshBuilder(unsigned gridEdgeSize)
-    : BaseMeshBuilder(gridEdgeSize, "OpenMP Loop")
-{
+const size_t LoopMeshBuilder::init_malloc_amount = 100000UL;
+const size_t LoopMeshBuilder::realloc_amount = 20000UL;
 
+LoopMeshBuilder::LoopMeshBuilder(unsigned gridEdgeSize)
+    : BaseMeshBuilder(gridEdgeSize, "Octree"), size(0UL), capacity(init_malloc_amount)
+{
+    auto is_power_of_2 = [](uint n) -> bool
+    {
+        return n != 0U && !(n & (n - 1U));
+    };
+
+    if (!is_power_of_2(mGridSize))
+        throw GridSizeException();
+        
+    triangles = static_cast<Triangle_t *>(malloc(capacity * sizeof(Triangle_t)));
+
+    if (triangles == nullptr)
+        throw std::bad_alloc();
 }
 
 unsigned LoopMeshBuilder::marchCubes(const ParametricScalarField &field)
 {
-    // 1. Compute total number of cubes in the grid.
-    size_t totalCubesCount = mGridSize*mGridSize*mGridSize;
-
     unsigned totalTriangles = 0;
 
-    // 2. Loop over each coordinate in the 3D grid.
-#   pragma omp parallel for reduction(+: totalTriangles)
-    for(size_t i = 0; i < totalCubesCount; ++i)
-    {
-        // 3. Compute 3D position in the grid.
-        Vec3_t<float> cubeOffset( i % mGridSize,
-                                 (i / mGridSize) % mGridSize,
-                                  i / (mGridSize*mGridSize));
-
-        // 4. Evaluate "Marching Cube" at given position in the grid and
-        //    store the number of triangles generated.
-        totalTriangles += buildCube(cubeOffset, field);
+#   pragma omp parallel for reduction(+: totalTriangles) schedule(dynamic) collapse(3)
+    for(uint i = 0U; i < mGridSize; i++) {
+        for (uint j = 0U; j < mGridSize; j++) {
+            for (uint k = 0U; k < mGridSize; k++) {
+                totalTriangles += buildCube(Vec3_t<float>(k, j, i), field);
+            }
+        }
     }
 
-    // 5. Return total number of triangles generated.
     return totalTriangles;
 }
 
@@ -73,7 +78,7 @@ float LoopMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const Parametri
     // 3. Finally take square root of the minimal square distance to get the real distance
     return sqrt(value);
 }
-
+/*
 void LoopMeshBuilder::emitTriangle(const BaseMeshBuilder::Triangle_t &triangle)
 {
     // NOTE: This method is called from "buildCube(...)"!
@@ -86,4 +91,26 @@ void LoopMeshBuilder::emitTriangle(const BaseMeshBuilder::Triangle_t &triangle)
     {
         mTriangles.push_back(triangle);
     }
+}
+*/
+
+void LoopMeshBuilder::emitTriangle(const BaseMeshBuilder::Triangle_t &triangle)
+{
+#   pragma omp critical
+    {
+        if (size + 1 >= capacity) {
+            capacity += realloc_amount;
+            triangles = static_cast<Triangle_t *>(realloc(triangles, capacity * sizeof(Triangle_t)));
+
+            if (triangles == nullptr)
+                throw std::bad_alloc();
+        }
+
+        triangles[size++] = triangle;
+    }
+}
+
+LoopMeshBuilder::~LoopMeshBuilder()
+{
+    free(triangles);
 }

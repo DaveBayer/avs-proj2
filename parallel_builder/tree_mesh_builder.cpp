@@ -16,21 +16,32 @@
 
 #include "tree_mesh_builder.h"
 
-//  assert(depth_limit == 2^n)
-const uint TreeMeshBuilder::depth_limit = 8U;
+const size_t TreeMeshBuilder::init_malloc_amount = 100000UL;
+const size_t TreeMeshBuilder::realloc_amount = 20000UL;
+const uint TreeMeshBuilder::depth_limit = 4U;
 
 TreeMeshBuilder::TreeMeshBuilder(unsigned gridEdgeSize)
-    : BaseMeshBuilder(gridEdgeSize, "Octree")
+    : BaseMeshBuilder(gridEdgeSize, "Octree"), size(0UL), capacity(init_malloc_amount)
 {
+    auto is_power_of_2 = [](uint n) -> bool
+    {
+        return n != 0U && !(n & (n - 1U));
+    };
 
+    if (!is_power_of_2(mGridSize))
+        throw GridSizeException();
+
+    triangles = static_cast<Triangle_t *>(malloc(capacity * sizeof(Triangle_t)));
+
+    if (triangles == nullptr)
+        throw std::bad_alloc();
 }
-/*
+
 uint TreeMeshBuilder::decomposeOctree(Vec3_t<uint> pos, uint size, const ParametricScalarField &field)
 {
     auto sphere_radius = [this](uint size) -> float
     {
-        constexpr float half_sqrt_3 = static_cast<float>(sqrt(3.0) / 2.0);
-        return mIsoLevel + half_sqrt_3 * static_cast<float>(size) * mGridResolution;
+        return mIsoLevel + sqrt(3.0) / 2.0 * static_cast<float>(size) * mGridResolution;
     };
 
     auto decompose = [](Vec3_t<uint> p, uint size) -> std::array<Vec3_t<uint>, 8UL>
@@ -44,34 +55,30 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<uint> pos, uint size, const Paramet
         }};
     };
 
-    auto cube_center_denorm = [this](Vec3_t<uint> p, uint size) -> Vec3_t<float>
+    auto cube_center = [this](Vec3_t<uint> p, uint size) -> Vec3_t<float>
     {
         uint sh = size >> 1;  //  size / 2
         return { (p.x + sh) * mGridResolution, (p.y + sh) * mGridResolution, (p.z + sh) * mGridResolution };
     };
 
-    uint totalTriangles = 0;
+    uint totalTriangles = 0U;
     
     if (size > depth_limit) {
         float r = sphere_radius(size);
         uint subcube_size = size >> 1;
 
         for (auto sc : decompose(pos, size)) {
-            Vec3_t<float> S = cube_center_denorm(sc, subcube_size);
-            
-            if (!(evaluateFieldAt(S, field) > r)) {
-#               pragma omp task shared(totalTriangles) firstprivate(sc, subcube_size, field)
-                {
-                    totalTriangles += decomposeOctree(sc, subcube_size, field);
-                }
+            Vec3_t<float> sc_center_pt = cube_center(sc, subcube_size);
+
+            if (!(evaluateFieldAt(sc_center_pt, field) > r)) {
+#               pragma omp task shared(totalTriangles) firstprivate(subcube_size, field)
+                totalTriangles += decomposeOctree(sc, subcube_size, field);
             }
-            
         }
 
 #       pragma omp taskwait
 
     } else {
-#       pragma omp parallel for reduction(+: totalTriangles) firstprivate(pos, field)
         for (uint i = 0U; i < depth_limit; i++) {
             for (uint j = 0U; j < depth_limit; j++) {
                 for (uint k = 0U; k < depth_limit; k++) {
@@ -86,186 +93,11 @@ uint TreeMeshBuilder::decomposeOctree(Vec3_t<uint> pos, uint size, const Paramet
 
 unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
 {
-    // Suggested approach to tackle this problem is to add new method to
-    // this class. This method will call itself to process the children.
-    // It is also strongly suggested to first implement Octree as sequential
-    // code and only when that works add OpenMP tasks to achieve parallelism.
-
     uint totalTriangles;
 
 #   pragma omp parallel
 #   pragma omp master
-    {
-        totalTriangles = decomposeOctree(Vec3_t<uint>(0U, 0U, 0U), mGridSize, field);
-    }
-
-    return totalTriangles;
-}
-*/
-
-/*
-uint TreeMeshBuilder::decomposeOctree(Vec3_t<float> pos, uint size, const ParametricScalarField &field)
-{
-    auto sphere_radius = [this](uint size) -> float
-    {
-        constexpr float half_sqrt_3 = static_cast<float>(sqrt(3.0) / 2.0);
-        return mIsoLevel + half_sqrt_3 * static_cast<float>(size) * mGridResolution;
-    };
-
-    auto decompose = [](Vec3_t<float> p, uint size) -> std::array<Vec3_t<float>, 8UL>
-    {
-        float sh = static_cast<float>(size >> 1);   //  (size / 2)
-        return {{
-            { p.x, p.y, p.z },              { p.x + sh, p.y, p.z },
-            { p.x, p.y + sh, p.z },         { p.x, p.y, p.z + sh },
-            { p.x + sh, p.y + sh, p.z },    { p.x, p.y + sh, p.z + sh },
-            { p.x + sh, p.y, p.z + sh },    { p.x + sh, p.y + sh, p.z + sh }
-        }};
-    };
-
-    auto cube_center_denormalized = [this](Vec3_t<float> p, uint size) -> Vec3_t<float>
-    {
-        float sh = static_cast<float>(size >> 1);  //  size / 2
-        return { (p.x + sh) * mGridResolution, (p.y + sh) * mGridResolution, (p.z + sh) * mGridResolution };
-    };
-
-    uint totalTriangles = 0;
-    
-    if (size > depth_limit) {
-        float r = sphere_radius(size);
-        uint subcube_size = size >> 1;
-
-        for (auto sc : decompose(pos, size)) {
-            Vec3_t<float> S = cube_center_denormalized(sc, subcube_size);
-            
-            if (!(evaluateFieldAt(S, field) > r)) {
-#               pragma omp task shared(totalTriangles) firstprivate(sc, subcube_size, field)
-                {
-                    totalTriangles += decomposeOctree(sc, subcube_size, field);
-                }
-            }
-            
-        }
-
-#       pragma omp taskwait
-
-    } else {
-#       pragma omp parallel for reduction(+: totalTriangles) firstprivate(pos, field)
-        for (uint i = 0U; i < depth_limit; i++) {
-            float z = pos.z + static_cast<float>(i);
-
-            for (uint j = 0U; j < depth_limit; j++) {
-                float y = pos.y + static_cast<float>(j);
-
-                for (uint k = 0U; k < depth_limit; k++) {
-                    float x = pos.x + static_cast<float>(k);
-                    totalTriangles += buildCube(Vec3_t<float>(x, y, z), field);
-                }
-            }
-        }
-    }
-
-    return totalTriangles;
-}
-
-unsigned TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
-{
-    // Suggested approach to tackle this problem is to add new method to
-    // this class. This method will call itself to process the children.
-    // It is also strongly suggested to first implement Octree as sequential
-    // code and only when that works add OpenMP tasks to achieve parallelism.
-
-    uint totalTriangles;
-
-#   pragma omp parallel
-#   pragma omp master
-    {
-        totalTriangles = decomposeOctree(Vec3_t<float>(0.f, 0.f, 0.f), mGridSize, field);
-    }
-
-    return totalTriangles;
-}
-*/
-
-uint TreeMeshBuilder::decomposeOctree(uint index, uint size, const ParametricScalarField &field)
-{
-    auto sphere_radius = [this](uint size) -> float
-    {
-        constexpr float half_sqrt_3 = static_cast<float>(sqrt(3.0) / 2.0);
-        return mIsoLevel + half_sqrt_3 * static_cast<float>(size) * mGridResolution;
-    };
-
-    auto decompose = [this](uint index, uint size) -> std::array<uint, 8UL>
-    {
-        uint x_shift = size >> 1;   //  size / 2
-        uint y_shift = x_shift * mGridSize;
-        uint z_shift = y_shift * mGridSize;
-
-        return std::array<uint, 8UL> {{
-            index,                        index + x_shift,
-            index + y_shift,              index + y_shift + x_shift,
-            index + z_shift,              index + z_shift + x_shift,
-            index + z_shift + y_shift,    index + z_shift + y_shift + x_shift
-        }};
-    };
-
-    auto cube_center = [this](uint i, uint s) -> Vec3_t<float>
-    {
-        return {
-            ((i % mGridSize) + s >> 1) * mGridResolution,
-            (((i / mGridSize) % mGridSize) + s >> 1) * mGridResolution,
-            ((i / (mGridSize * mGridSize)) + s >> 1) * mGridResolution
-        };
-    };
-
-    auto cube_index_to_offset = [this](uint i) -> Vec3_t<float>
-    {
-        return Vec3_t<float>(i % mGridSize, (i / mGridSize) % mGridSize, i / (mGridSize * mGridSize));
-    };
-
-    uint totalTriangles = 0;
-    
-    if (size > depth_limit) {
-        uint subcube_size = size >> 1;  //  size / 2
-
-        for (auto subcube_index : decompose(index, size)) {
-            Vec3_t<float> S = cube_center(subcube_index, subcube_size);
-
-            if (!(evaluateFieldAt(S, field) > sphere_radius(size))) {
-#               pragma omp task shared(totalTriangles) firstprivate(subcube_index, subcube_size, field)
-                {
-                    totalTriangles += decomposeOctree(subcube_index, subcube_size, field);
-                }
-            }
-        }
-
-#       pragma omp taskwait
-
-    } else {
-#       pragma omp parallel for reduction(+: totalTriangles) firstprivate(index, mGridSize, field)
-        for (uint i = 0U; i < depth_limit; i++) {
-            for (uint j = 0U; j < depth_limit; j++) {
-                for (uint k = 0U; k < depth_limit; k++) {
-                    uint idx = index + i * mGridSize * mGridSize + j * mGridSize + k;
-                    totalTriangles += buildCube(cube_index_to_offset(idx), field);
-                }
-            }
-        }
-
-    }
-
-    return totalTriangles;
-}
-
-uint TreeMeshBuilder::marchCubes(const ParametricScalarField &field)
-{
-    uint totalTriangles;
-
-#   pragma omp parallel
-#   pragma omp master
-    {
-        totalTriangles = decomposeOctree(0U, mGridSize, field);
-    }
+    totalTriangles = decomposeOctree(Vec3_t<uint>(0U, 0U, 0U), mGridSize, field);
 
     return totalTriangles;
 }
@@ -301,14 +133,21 @@ float TreeMeshBuilder::evaluateFieldAt(const Vec3_t<float> &pos, const Parametri
 
 void TreeMeshBuilder::emitTriangle(const BaseMeshBuilder::Triangle_t &triangle)
 {
-    // NOTE: This method is called from "buildCube(...)"!
-
-    // Store generated triangle into vector (array) of generated triangles.
-    // The pointer to data in this array is return by "getTrianglesArray(...)" call
-    // after "marchCubes(...)" call ends.
-
 #   pragma omp critical
     {
-        mTriangles.push_back(triangle);
+        if (size + 1 >= capacity) {
+            capacity += realloc_amount;
+            triangles = static_cast<Triangle_t *>(realloc(triangles, capacity * sizeof(Triangle_t)));
+
+            if (triangles == nullptr)
+                throw std::bad_alloc();
+        }
+
+        triangles[size++] = triangle;
     }
+}
+
+TreeMeshBuilder::~TreeMeshBuilder()
+{
+    free(triangles);
 }
